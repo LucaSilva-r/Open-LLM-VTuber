@@ -1,0 +1,112 @@
+name: OpenLLM-Vtuber
+
+services:
+  opnellm:
+    container_name: openllm_vtuber
+    build:
+      context: .
+    image: silvaluca/openllmvtuber:latest
+    volumes:
+      - ./conf.yaml:/app/conf.yaml
+      - ./assets:/app/assets
+      - ./avatars:/app/avatars
+      - ./backgrounds:/app/backgrounds
+      - ./live2d-models:/app/live2d-models
+      - ./prompts:/app/prompts
+      - ./models:/app/models
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./characters:/characters
+      - ./chat_history:/app/history
+    networks:
+      - main
+      - api
+    environment:
+      - TZ=Europe/Rome
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    ports:
+      - 12393:12393
+    labels:
+      traefik.enable: true
+      traefik.docker.network: main
+      traefik.http.routers.vtuber.rule: Host(`vtuber.silvaserv.it`)
+      traefik.http.routers.vtuber.tls: true
+      traefik.http.routers.vtuber.tls.certresolver: lets-encrypt
+      traefik.http.routers.vtuber.service: vtuber
+      traefik.http.routers.vtuber.middlewares: authentik@file
+      traefik.http.services.vtuber.loadbalancer.server.port: 12393
+
+  # llm:
+  #     container_name: openllm_ollama
+  #     deploy:
+  #       resources:
+  #         reservations:
+  #           devices:
+  #             - driver: nvidia
+  #               count: all
+  #               capabilities:
+  #                 - gpu
+  #     environment:
+  #       - TZ=Europe/Rome
+  #     volumes:
+  #       - ./ignore/ollama:/root/.ollama
+  #     image: ollama/ollama
+  #     networks:
+  #       - api
+  #     env_file:
+  #       - .env
+
+  # letta:
+  #   container_name: openllm_letta
+  #   volumes:
+  #     - ./ignore/letta:/var/lib/postgresql/data
+  #   environment:
+  #     #- OLLAMA_BASE_URL=http://openllm_ollama:11434
+  #     #- VLLM_API_BASE=http://openllm_vllm:8000/v1
+  #     - TZ=Europe/Rome
+  #   image: letta/letta:latest
+  #   ports:
+  #     - 8283:8283
+  #   networks:
+  #     - api
+  #     - main
+  #   env_file:
+  #     - .env
+
+  tabbyapi:
+    container_name: openllm_tabbyapi
+    image: ghcr.io/theroyallab/tabbyapi:latest
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:5000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NAME=TabbyAPI
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./ignore/tabby/models:/app/models # Change me
+      - ./ignore/tabby/config/config.yml:/app/config.yml # Change me
+      - ./ignore/tabby/config/tabby_api_tokens.yml:/app/api_tokens.yml # Change me
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    restart: unless-stopped
+    networks:
+      - api
+
+
+networks:
+  main:
+    external: true
+  api:

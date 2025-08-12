@@ -1,0 +1,11 @@
+ignore
+ignore/*
+models
+models/*
+.venv
+.venv/*
+dockerfile
+docker-compose.yml
+cache
+cache/*
+.env
