@@ -75,3 +75,5 @@ tmp/
 private/
 mcp_servers.json
 ignore
+
+.vscode/
