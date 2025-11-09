@@ -1,5 +1,5 @@
 # Base image. Used CUDA 11 for compatibility with sherpa onnx GPU version
-FROM nvidia/cuda:11.6.1-cudnn8-runtime-ubuntu20.04 AS base
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04 AS base
 
 # Set noninteractive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
