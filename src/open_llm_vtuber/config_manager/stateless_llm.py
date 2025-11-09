@@ -1,6 +1,6 @@
 # config_manager/llm.py
 from typing import ClassVar, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from .i18n import I18nMixin, Description
 
 
@@ -233,6 +233,8 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
     """Pool of LLM provider configurations.
     This class contains configurations for different LLM providers."""
 
+    model_config = ConfigDict(extra='allow')
+
     stateless_llm_with_template: StatelessLLMWithTemplate | None = Field(
         None, alias="stateless_llm_with_template"
     )
@@ -241,6 +243,7 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
     )
     ollama_llm: OllamaConfig | None = Field(None, alias="ollama_llm")
     lmstudio_llm: LmStudioConfig | None = Field(None, alias="lmstudio_llm")
+    intent_classifier_llm: OpenAICompatibleConfig | None = Field(None, alias="intent_classifier_llm")
     openai_llm: OpenAIConfig | None = Field(None, alias="openai_llm")
     gemini_llm: GeminiConfig | None = Field(None, alias="gemini_llm")
     zhipu_llm: ZhipuConfig | None = Field(None, alias="zhipu_llm")
@@ -261,6 +264,10 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
         "ollama_llm": Description(en="Configuration for Ollama", zh="Ollama 配置"),
         "lmstudio_llm": Description(
             en="Configuration for LM Studio", zh="LM Studio 配置"
+        ),
+        "intent_classifier_llm": Description(
+            en="Configuration for dedicated intent classification LLM (OpenAI-compatible)",
+            zh="专用意图分类大语言模型配置（OpenAI兼容）"
         ),
         "openai_llm": Description(
             en="Configuration for Official OpenAI API", zh="官方 OpenAI API 配置"

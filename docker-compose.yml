@@ -1,23 +1,24 @@
 name: OpenLLM-Vtuber
 
 services:
-  opnellm:
+  openllm:
     container_name: openllm_vtuber
     build:
       context: .
     image: silvaluca/openllmvtuber:latest
     volumes:
-      - ./conf.yaml:/app/conf.yaml
-      - ./assets:/app/assets
-      - ./avatars:/app/avatars
-      - ./backgrounds:/app/backgrounds
-      - ./live2d-models:/app/live2d-models
-      - ./prompts:/app/prompts
-      - ./models:/app/models
-      - ./src:/app/src
-      - ./logs:/app/logs
-      - ./characters:/characters
-      - ./chat_history:/app/history
+      - .:/app
+      # - ./conf.yaml:/app/conf.yaml
+      # - ./assets:/app/assets
+      # - ./avatars:/app/avatars
+      # - ./backgrounds:/app/backgrounds
+      # - ./live2d-models:/app/live2d-models
+      # - ./prompts:/app/prompts
+      # - ./models:/app/models
+      # - ./src:/app/src
+      # - ./logs:/app/logs
+      # - ./characters:/characters
+      # - ./chat_history:/app/history
     networks:
       - main
       - api
@@ -29,7 +30,7 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [ gpu ]
+              capabilities: [gpu]
     ports:
       - 12393:12393
     labels:
@@ -41,70 +42,109 @@ services:
       traefik.http.routers.vtuber.service: vtuber
       traefik.http.routers.vtuber.middlewares: authentik@file
       traefik.http.services.vtuber.loadbalancer.server.port: 12393
+    restart: unless-stopped
 
-  # llm:
-  #     container_name: openllm_ollama
-  #     deploy:
-  #       resources:
-  #         reservations:
-  #           devices:
-  #             - driver: nvidia
-  #               count: all
-  #               capabilities:
-  #                 - gpu
-  #     environment:
-  #       - TZ=Europe/Rome
-  #     volumes:
-  #       - ./ignore/ollama:/root/.ollama
-  #     image: ollama/ollama
-  #     networks:
-  #       - api
-  #     env_file:
-  #       - .env
-
-  # letta:
-  #   container_name: openllm_letta
-  #   volumes:
-  #     - ./ignore/letta:/var/lib/postgresql/data
-  #   environment:
-  #     #- OLLAMA_BASE_URL=http://openllm_ollama:11434
-  #     #- VLLM_API_BASE=http://openllm_vllm:8000/v1
-  #     - TZ=Europe/Rome
-  #   image: letta/letta:latest
-  #   ports:
-  #     - 8283:8283
-  #   networks:
-  #     - api
-  #     - main
-  #   env_file:
-  #     - .env
-
-  tabbyapi:
-    container_name: openllm_tabbyapi
-    image: ghcr.io/theroyallab/tabbyapi:latest
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:5000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  llamacpp:
+    image: ghcr.io/ggerganov/llama.cpp:server-cuda
     environment:
-      - NAME=TabbyAPI
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
-      - ./ignore/tabby/models:/app/models # Change me
-      - ./ignore/tabby/config/config.yml:/app/config.yml # Change me
-      - ./ignore/tabby/config/tabby_api_tokens.yml:/app/api_tokens.yml # Change me
+      - ./models/llm:/models
+    command: >
+      --host 0.0.0.0
+      --port 8080
+      --model /models/Mistral-Nemo-Instruct-2407-Q6_K.gguf
+      --ctx-size 16384
+      --n-gpu-layers 99
+      --parallel 1
+      --flash-attn
+      --batch-size 512
+      --ubatch-size 512
+      --cache-type-k f16
+      --cache-type-v f16
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [ gpu ]
+              capabilities: [gpu]
     restart: unless-stopped
     networks:
       - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  llamacpp-tools:
+    image: ghcr.io/ggerganov/llama.cpp:server-cuda
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./models/llm:/models
+    command: >
+      --host 0.0.0.0
+      --port 8081
+      --model /models/Meta-Llama-3.1-8B-Instruct-Q6_K.gguf
+      --ctx-size 8192
+      --n-gpu-layers 99
+      --parallel 1
+      --flash-attn
+      --batch-size 512
+      --ubatch-size 512
+      --cache-type-k f16
+      --cache-type-v f16
+      --jinja
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "8081:8081"
+
+  llamacpp-intent:
+    image: ghcr.io/ggerganov/llama.cpp:server-cuda
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./models/llm:/models
+    command: >
+      --host 0.0.0.0
+      --port 8082
+      --model /models/Llama-3.2-3B-Instruct-Q8_0.gguf
+      --ctx-size 8096
+      --parallel 1
+      --batch-size 512
+      --ubatch-size 512
+      --flash-attn
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   main:

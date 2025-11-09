@@ -119,6 +119,70 @@ class Mem0Config(I18nMixin, BaseModel):
 # =================================
 
 
+class DualModelAgentConfig(I18nMixin, BaseModel):
+    """Configuration for the dual model agent."""
+
+    conversation_llm_provider: str = Field(..., alias="conversation_llm_provider")
+    tool_llm_provider: str = Field(..., alias="tool_llm_provider")
+    intent_llm_provider: Optional[str] = Field(None, alias="intent_llm_provider")
+
+    faster_first_response: Optional[bool] = Field(True, alias="faster_first_response")
+    segment_method: Literal["regex", "pysbd"] = Field("pysbd", alias="segment_method")
+    use_mcpp: Optional[bool] = Field(False, alias="use_mcpp")
+    mcp_enabled_servers: Optional[List[str]] = Field([], alias="mcp_enabled_servers")
+
+    intent_detection_method: Literal["llm", "keyword"] = Field(
+        "llm", alias="intent_detection_method"
+    )
+    tool_keywords: Optional[List[str]] = Field(None, alias="tool_keywords")
+    enable_tool_acknowledgment: Optional[bool] = Field(
+        True, alias="enable_tool_acknowledgment"
+    )
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "conversation_llm_provider": Description(
+            en="Fast LLM provider for general conversation",
+            zh="用于一般对话的快速大语言模型提供者",
+        ),
+        "tool_llm_provider": Description(
+            en="LLM provider specialized for tool calling",
+            zh="专门用于工具调用的大语言模型提供者",
+        ),
+        "intent_llm_provider": Description(
+            en="Optional dedicated LLM provider for intent classification (if not specified, uses conversation_llm_provider)",
+            zh="可选的专用意图分类大语言模型提供者（如果未指定，则使用 conversation_llm_provider）",
+        ),
+        "faster_first_response": Description(
+            en="Whether to respond as soon as encountering a comma in the first sentence to reduce latency (default: True)",
+            zh="是否在第一句回应时遇上逗号就直接生成音频以减少首句延迟（默认：True）",
+        ),
+        "segment_method": Description(
+            en="Method for segmenting sentences: 'regex' or 'pysbd' (default: 'pysbd')",
+            zh="分割句子的方法：'regex' 或 'pysbd'（默认：'pysbd'）",
+        ),
+        "use_mcpp": Description(
+            en="Whether to use MCP (Model Context Protocol) for the agent (default: True)",
+            zh="是否使用为智能体启用 MCP (Model Context Protocol) Plus（默认：False）",
+        ),
+        "mcp_enabled_servers": Description(
+            en="List of MCP servers to enable for the agent",
+            zh="为智能体启用 MCP 服务器列表",
+        ),
+        "intent_detection_method": Description(
+            en="Method for intent detection: 'llm' or 'keyword' (default: 'llm')",
+            zh="意图检测方法：'llm' 或 'keyword'（默认：'llm'）",
+        ),
+        "tool_keywords": Description(
+            en="Optional list of keywords for keyword-based intent detection (only used when intent_detection_method is 'keyword')",
+            zh="关键词意图检测的可选关键词列表（仅在 intent_detection_method 为 'keyword' 时使用）",
+        ),
+        "enable_tool_acknowledgment": Description(
+            en="Whether to generate an acknowledgment message before executing tools to give immediate user feedback (default: True)",
+            zh="是否在执行工具前生成确认消息以提供即时用户反馈（默认：True）",
+        ),
+    }
+
+
 class HumeAIConfig(I18nMixin, BaseModel):
     """Configuration for the Hume AI agent."""
 
@@ -178,6 +242,9 @@ class AgentSettings(I18nMixin, BaseModel):
     basic_memory_agent: Optional[BasicMemoryAgentConfig] = Field(
         None, alias="basic_memory_agent"
     )
+    dual_model_agent: Optional[DualModelAgentConfig] = Field(
+        None, alias="dual_model_agent"
+    )
     mem0_agent: Optional[Mem0Config] = Field(None, alias="mem0_agent")
     hume_ai_agent: Optional[HumeAIConfig] = Field(None, alias="hume_ai_agent")
     letta_agent: Optional[LettaConfig] = Field(None, alias="letta_agent")
@@ -185,6 +252,9 @@ class AgentSettings(I18nMixin, BaseModel):
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "basic_memory_agent": Description(
             en="Configuration for basic memory agent", zh="基础记忆代理配置"
+        ),
+        "dual_model_agent": Description(
+            en="Configuration for dual model agent", zh="双模型代理配置"
         ),
         "mem0_agent": Description(en="Configuration for Mem0 agent", zh="Mem0代理配置"),
         "hume_ai_agent": Description(
@@ -200,7 +270,11 @@ class AgentConfig(I18nMixin, BaseModel):
     """This class contains all of the configurations related to agent."""
 
     conversation_agent_choice: Literal[
-        "basic_memory_agent", "mem0_agent", "hume_ai_agent", "letta_agent"
+        "basic_memory_agent",
+        "dual_model_agent",
+        "mem0_agent",
+        "hume_ai_agent",
+        "letta_agent",
     ] = Field(..., alias="conversation_agent_choice")
     agent_settings: AgentSettings = Field(..., alias="agent_settings")
     llm_configs: StatelessLLMConfigs = Field(..., alias="llm_configs")

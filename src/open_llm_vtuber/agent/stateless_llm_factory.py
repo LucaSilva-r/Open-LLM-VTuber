@@ -31,6 +31,8 @@ class LLMFactory:
             or llm_provider == "groq_llm"
             or llm_provider == "mistral_llm"
             or llm_provider == "lmstudio_llm"
+            or llm_provider == "intent_classifier_llm"
+            or llm_provider == "mistral_nemo_llm"
         ):
             return OpenAICompatibleLLM(
                 model=kwargs.get("model"),

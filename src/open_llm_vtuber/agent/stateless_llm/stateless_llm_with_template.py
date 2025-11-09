@@ -170,7 +170,7 @@ class AsyncLLMWithTemplate(StatelessLLMInterface):
                             yield next_token
         except Exception as e:
             logger.error(f"LLM API WITH TEMPLATE: Error occurred: {e}")
-            logger.info(f"Base URL: {self.base_url}")
+            logger.info(f"Completion URL: {self.completion_url}")
             logger.info(f"Model: {self.model}")
             logger.info(f"Messages: {messages}")
             logger.info(f"temperature: {self.temperature}")
@@ -190,6 +190,13 @@ class AsyncLLMWithTemplate(StatelessLLMInterface):
         return line
 
     def _process_line(self, line):
+        # Check for error responses from the API
+        if "error" in line:
+            error_info = line["error"]
+            error_msg = f"API Error: {error_info.get('message', 'Unknown error')}"
+            logger.error(f"Received error from completion endpoint: {error_info}")
+            raise Exception(error_msg)
+
         if not (("stop" in line) and (line["stop"])):
             token = line["content"]
             return token

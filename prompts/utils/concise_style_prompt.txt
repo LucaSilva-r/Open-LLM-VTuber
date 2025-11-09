@@ -1,18 +1,18 @@
-# Dialogue Protocol
+### Protocollo di dialogo
 
-[Response Guidelines]
-- Keep responses brief and focused (1-2 sentences)
-- Balance core message with engagement elements
-- Use natural, flowing language
-- Maintain concise sentence structure
+**[Linee guida per le risposte]**
+- Mantieni le risposte brevi e mirate (1-2 frasi)
+- Bilancia il messaggio centrale con elementi di coinvolgimento
+- Usa un linguaggio naturale e scorrevole
+- Mantieni una struttura della frase concisa
 
-[Flow Requirements]
-- Favor questions over statements
-- Include contextual follow-ups
-- Keep exchanges dynamic
+**[Requisiti del flusso]**
+- Prediligi le domande rispetto alle affermazioni
+- Includi follow-up contestuali
+- Mantieni gli scambi dinamici
 
-[Style Rules]
-- Avoid lengthy monologues
-- No consecutive statements without engagement
-- Skip complex qualifying phrases
-- Use simple sentence structures
+**[Regole di stile]**
+- Evita monologhi prolungati
+- Non fare affermazioni consecutive senza coinvolgimento
+- Evita frasi qualificative complesse
+- Usa strutture di frasi semplici

@@ -97,6 +97,48 @@ class AsyncLLM(StatelessLLMInterface):
 
             available_tools = tools if self.support_tools else NOT_GIVEN
 
+            # llama.cpp doesn't support streaming with tools, so disable streaming when tools are present
+            use_streaming = True
+            if available_tools is not NOT_GIVEN and len(available_tools) > 0:
+                use_streaming = False
+                logger.debug("Tools provided - disabling streaming for llama.cpp compatibility")
+
+            logger.debug(
+                f"Tool Support: {self.support_tools}, Available tools: {available_tools}, Streaming: {use_streaming}"
+            )
+
+            # Handle non-streaming response when tools are used
+            if not use_streaming:
+                response = await self.client.chat.completions.create(
+                    messages=messages_with_system,
+                    model=self.model,
+                    stream=False,
+                    temperature=self.temperature,
+                    tools=available_tools,
+                )
+
+                # Extract tool calls if present
+                if response.choices[0].message.tool_calls:
+                    tool_calls_list = [
+                        ToolCallObject.from_dict({
+                            "id": tc.id,
+                            "type": tc.type,
+                            "index": idx,  # Add index since non-streaming API doesn't provide it
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments,
+                            },
+                        })
+                        for idx, tc in enumerate(response.choices[0].message.tool_calls)
+                    ]
+                    logger.info(f"Non-streaming tool calls detected: {tool_calls_list}")
+                    yield tool_calls_list
+                elif response.choices[0].message.content:
+                    # Yield content if no tool calls
+                    yield response.choices[0].message.content
+                return
+
+            # Original streaming logic
             stream: AsyncStream[
                 ChatCompletionChunk
             ] = await self.client.chat.completions.create(
@@ -105,9 +147,6 @@ class AsyncLLM(StatelessLLMInterface):
                 stream=True,
                 temperature=self.temperature,
                 tools=available_tools,
-            )
-            logger.debug(
-                f"Tool Support: {self.support_tools}, Available tools: {available_tools}"
             )
 
             async for chunk in stream:

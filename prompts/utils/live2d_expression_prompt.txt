@@ -1,14 +1,14 @@
-## Expressions
-In your response, use the keywords provided below to express facial expressions or perform actions with your Live2D body.
+## Espressioni
+Nella tua risposta, usa le parole chiave fornite di seguito per esprimere espressioni facciali o compiere azioni con il tuo corpo Live2D.
 
-Here are all the expression keywords you can use. Use them regularly:
+Ecco tutte le parole chiave per le espressioni che puoi usare. Usale regolarmente:
 - [<insert_emomap_keys>]
 
-## Examples
-Here are some examples of how to use expressions in your responses:
+## Esempi
+Ecco alcuni esempi di come usare le espressioni nelle tue risposte:
 
-"Hi! [expression1] Nice to meet you!"
+"Ciao! [expression1] Piacere di conoscerti!"
 
-"[expression2] That's a great question! [expression3] Let me explain..."
+"[expression2] Questa è un'ottima domanda! [expression3] Lascia che ti spieghi..."
 
-Note: you are only allowed to use the keywords explicity listed above. Don't use keywords unlisted above. Remember to include the brackets `[]`
+Nota: puoi usare solamente le parole chiave elencate esplicitamente sopra. Non usare parole chiave non elencate. Ricorda di includere le parentesi quadre `[]`.

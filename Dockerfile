@@ -9,7 +9,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update and install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg
+RUN apt-get update && apt-get install -y git curl && apt-get install -y --no-install-recommends ffmpeg
 
 # Set working directory
 WORKDIR /app
@@ -24,18 +24,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --no-dev --find-links https://k2-fsa.github.io/sherpa/onnx/cuda.html --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-11/pypi/simple/
 #    uv pip uninstall onnxruntime sherpa-onnx faster-whisper
 
-# Install the sherpa-onnx GPU version
-#RUN uv pip install onnxruntime-gpu sherpa-onnx==1.11.3+cuda -f https://k2-fsa.github.io/sherpa/onnx/cuda.html 
-#RUN uv pip install faster-whisper gradio_client
-#RUN uv pip install gradio_client
-
-# Install FunASR
-#RUN uv pip install funasr modelscope huggingface_hub pywhispercpp torch torchaudio edge-tts azure-cognitiveservices-speech
-
-# Install Coqui TTS
-#RUN uv pip install transformers "coqui-tts[languages]"
-
-
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 COPY . /app
@@ -44,5 +32,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Expose port 12393 (the new default port)
 EXPOSE 12393
+
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+
 
 CMD ["uv", "run", "run_server.py"]

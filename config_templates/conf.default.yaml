@@ -69,6 +69,32 @@ character_config:
         use_mcpp: True
         mcp_enabled_servers: ["time", "ddg-search"] # Enabled MCP servers
 
+      dual_model_agent:
+        # Dual Model Agent - Uses two separate LLMs for better performance
+        # Fast model for conversation, specialized model for tool calling
+        conversation_llm_provider: 'ollama_llm'  # Fast conversational model
+        tool_llm_provider: 'lmstudio_llm'  # Tool-specialized model
+        intent_llm_provider: 'intent_classifier_llm'  # Optional: Tiny model for intent classification (recommended)
+        faster_first_response: True
+        segment_method: 'pysbd'
+        use_mcpp: True  # Enable MCP for tool calling
+        mcp_enabled_servers: ["time", "ddg-search", "home-assistant"]  # Enabled MCP servers
+
+        # Intent Detection Method: "llm" or "keyword"
+        # - "llm": Uses fast LLM to classify intent (more accurate, handles ambiguous queries)
+        # - "keyword": Simple keyword matching (faster, but less flexible)
+        intent_detection_method: 'llm'  # Recommended for better accuracy
+
+        # Optional: Customize keywords for fallback keyword-based detection
+        # Only used when intent_detection_method is "keyword"
+        # If not specified, will use built-in keywords
+        # tool_keywords: ["turn on", "turn off", "light", "temperature", "search"]
+
+        # Tool Acknowledgment: Generate immediate feedback before executing tools
+        # When enabled, the AI will say something like "Let me turn that on for you"
+        # before actually executing the tool, giving the user instant feedback
+        enable_tool_acknowledgment: True  # Default: True
+
       letta_agent:
         host: 'localhost' # Host address
         port: 8283 # Port number
@@ -139,6 +165,18 @@ character_config:
         base_url: 'http://localhost:1234/v1'
         model: 'qwen2.5:latest'
         temperature: 1.0 # value between 0 to 2
+
+      # Intent Classifier LLM (for dual_model_agent)
+      # Small, fast model dedicated to intent classification
+      # Recommended: tiny models like qwen2.5:0.5b for ultra-low latency
+      intent_classifier_llm:
+        base_url: 'http://localhost:11434/v1'
+        llm_api_key: 'not-needed'
+        organization_id: null
+        project_id: null
+        model: 'qwen2.5:0.5b'  # Use smallest model for fastest classification
+        temperature: 0.1  # Very low for consistent classification
+        interrupt_method: 'user'
 
       openai_llm:
         llm_api_key: 'Your Open AI API key'

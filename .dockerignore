@@ -5,6 +5,7 @@ models/*
 .venv
 .venv/*
 dockerfile
+Dockerfile
 docker-compose.yml
 cache
 cache/*
