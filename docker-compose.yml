@@ -7,18 +7,18 @@ services:
       context: .
     image: silvaluca/openllmvtuber:latest
     volumes:
-      - .:/app
-      # - ./conf.yaml:/app/conf.yaml
-      # - ./assets:/app/assets
-      # - ./avatars:/app/avatars
-      # - ./backgrounds:/app/backgrounds
-      # - ./live2d-models:/app/live2d-models
-      # - ./prompts:/app/prompts
-      # - ./models:/app/models
-      # - ./src:/app/src
-      # - ./logs:/app/logs
-      # - ./characters:/characters
-      # - ./chat_history:/app/history
+      - .:/home/vtuber/app
+      # - ./conf.yaml:/home/vtuber/app/conf.yaml
+      # - ./assets:/home/vtuber/app/assets
+      # - ./avatars:/home/vtuber/app/avatars
+      # - ./backgrounds:/home/vtuber/app/backgrounds
+      # - ./live2d-models:/home/vtuber/app/live2d-models
+      # - ./prompts:/home/vtuber/app/prompts
+      # - ./models:/home/vtuber/app/models
+      # - ./src:/home/vtuber/app/src
+      # - ./logs:/home/vtuber/app/logs
+      # - ./characters:/home/vtuber/app/characters
+      # - ./chat_history:/home/vtuber/app/history
     networks:
       - main
       - api
